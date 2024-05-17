@@ -13,6 +13,10 @@
 #include "sample3_ogg.h"
 #include "blipSelect_wav.h"
 
+#include "random_sammakko_png.h"
+#include "random_sammakko_super_isku_png.h"
+#include "lampi_png.h"
+
 static u64 deltaTimeStart = 0;
 static u64 programStart = 0;
 
@@ -23,12 +27,11 @@ Template::Template()
 
 void Template::Init()
 {
-    barb.LoadImageBuffer(barb_png, barb_png_size, gdl::Linear, gdl::RGBA8);
-    mel_image.LoadImageBuffer(mel_tiles_png, mel_tiles_png_size, gdl::Nearest, gdl::RGBA8);
-    short spritesPerRow = 2;
-    gdl::SpriteSetConfig cfg = mel_sprites.CreateConfig(spritesPerRow, 62,62);
-    mel_sprites.LoadSprites(cfg, &mel_image);
+    frogSit.LoadImageBuffer(random_sammakko_png, random_sammakko_png_size, gdl::Nearest, gdl::RGBA8);
+    frogLick.LoadImageBuffer(random_sammakko_super_isku_png, random_sammakko_super_isku_png_size, gdl::Nearest, gdl::RGBA8);
 
+    pond.LoadImageBuffer(lampi_png, lampi_png_size, gdl::Nearest, gdl::RGBA8);
+    
     pointerImage.LoadImageBuffer(pointer_png, pointer_png_size, gdl::Nearest, gdl::RGBA8);
 
 
@@ -60,13 +63,41 @@ void DrawTextDouble(const char* text, short x, short y, float scale, gdl::FFont*
 void Template::Draw()
 {
     // Draw Image
+    /*
     barb.Put(
             gdl::ScreenCenterX - barb.Xsize()/4, 
             gdl::ScreenCenterY-barb.Ysize()/4, 
             gdl::Color::White, 
             0, 0, 
             0.5f, 0.0f);
+    */
+
+    pond.Put(0, 0, gdl::Color::White, 0, 0, 1.0f, 0.0f);
+    float frogScale = 1.0f;
+
+    gdl::vec2 cp = gdl::WiiInput::GetCursorPosition();
+
+    gdl::vec2 frogCenter = gdl::vec2(frogSit.Xsize()/2, frogSit.Ysize()/2);
+
+    if (gdl::WiiInput::ButtonHeld(WPAD_BUTTON_A)) 
+    {
+        frogLick.Put(cp.x + frogCenter.x, cp.y + frogCenter.y,
+        gdl::Color::White, gdl::RJustify,gdl::RJustify, frogScale, 0.0f);
+    }
+    else
+    {
+        frogSit.Put(cp.x + frogCenter.x, cp.y + frogCenter.y,
+        gdl::Color::White, gdl::RJustify,gdl::RJustify, frogScale, 0.0f);
+
+    }
+
+    // gdl::DrawBox(cp.x, cp.y, cp.x+ frogSit.Xsize() * frogScale, cp.y + frogSit.Ysize() * frogScale, gdl::Color::Red);
     float fontScale = 2.0f;
+
+    ibmFont.Printf(10, 10, 1.0f, gdl::Color::White, "Frog size: %d", frogSit.Xsize());
+    ibmFont.Printf(10, 20, 1.0f, gdl::Color::White, "Lick size: %d", frogLick.Xsize());
+    ibmFont.Printf(10, 30, 1.0f, gdl::Color::White, "Pond size: %d", pond.Xsize());
+    ibmFont.Printf(10, 40, 1.0f, gdl::Color::Red, "Screen size: %d x %d", gdl::ScreenXres, gdl::ScreenYres);
 
     DrawTextDouble("MTEK-GDL", gdl::ScreenCenterX, ibmFont.GetHeight(), fontScale, &ibmFont);
     DrawTextDouble(GDL_VERSION, gdl::ScreenCenterX, ibmFont.GetHeight() * 2 * fontScale, fontScale, &ibmFont);
@@ -75,11 +106,13 @@ void Template::Draw()
     // Input
     short top = 32;
     short left = 32;
-    DrawMenu(left, top + 120, 120);
     DrawInputInfo(left, top);
+    /*
+    DrawMenu(left, top + 120, 120);
     DrawTimingInfo(left, gdl::ScreenYres-ibmFont.GetHeight()*4*1.5f, 1.5f);
+*/
 
-    DrawSprites();
+    // DrawSprites();
 }
 
 static void DrawButtons(short x, short y, short size, gdl::FFont* font)
@@ -164,11 +197,13 @@ void Template::DrawInputInfo(int x, int y)
 
     pointerImage.Put(cp.x,cp.y,gdl::Color::White, 0, 0, 1.0f);
 
+/*
     DrawButtons(x, y, 20, &ibmFont);
     y += 20;
     DrawDPad(x, y, 60);
     x += 80;
     DrawJoystick(x, y, 60);
+    */
 }
 
 void Template::DrawSprites()

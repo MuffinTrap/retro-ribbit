@@ -14,6 +14,11 @@ class Template
     gdl::Sound blip;
     gdl::MenuCreator menu;
 
+    // Frogs
+    gdl::Image frogSit;
+    gdl::Image frogLick;
+    gdl::Image pond;
+
     public:
         Template();
         void Init();
