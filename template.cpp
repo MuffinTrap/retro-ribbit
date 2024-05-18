@@ -3,6 +3,7 @@
 #include <wiiuse/wpad.h>
 #include "mgdl-input-wii.h"
 #include <string>
+#include <cstdlib>
 
 #include <ogc/lwp_watchdog.h>
 
@@ -62,6 +63,10 @@ void Template::Init()
     // settime((u64)0); // Setting time to 0 crashes Dolphin!
     deltaTimeStart = gettime();
     programStart = deltaTimeStart;
+    // Initialize randomness
+    std::srand(deltaTimeStart);
+
+    fly = Snack(&flySnackSprites, glm::vec2(gdl::ScreenCenterX, gdl::ScreenYres/5));
 }
 
 void Template::Update()
@@ -86,6 +91,18 @@ void Template::Update()
         if (frogOnGround) {
             frogState.velocity += glm::vec2(0.f, 6.f);
         }
+    }
+
+    fly.Update(deltaTime);
+
+    if (gdl::WiiInput::ButtonPress(WPAD_BUTTON_1))
+    {
+        fly.maxForce += 0.1f;
+
+    }
+    if (gdl::WiiInput::ButtonPress(WPAD_BUTTON_2))
+    {
+        fly.maxSpeed += 0.1f;
     }
 }
 
@@ -150,6 +167,8 @@ void Template::Draw()
     frogSit.Put(
       frogRenderPos.x, frogRenderPos.y, gdl::Color::White, gdl::Centered, gdl::Centered, 0.1f, 0.f
     );
+
+    fly.Draw(&ibmFont);
 
     // gdl::DrawBox(cp.x, cp.y, cp.x+ frogSit.Xsize() * frogScale, cp.y + frogSit.Ysize() * frogScale, gdl::Color::Red);
     float fontScale = 2.0f;

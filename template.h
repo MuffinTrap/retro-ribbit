@@ -37,6 +37,7 @@ class Template
     // Snacks
     gdl::Image flySnack;
     gdl::SpriteSet flySnackSprites;
+    Snack fly;
 
     public:
         Template();
