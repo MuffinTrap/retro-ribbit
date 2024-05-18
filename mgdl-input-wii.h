@@ -45,6 +45,8 @@ namespace gdl
 
         // In rad -PI...PI
         float GetRoll();
+
+        bool IsFlickingUp();
     }
 }
 #endif

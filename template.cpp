@@ -77,6 +77,8 @@ void Template::Update()
     deltaTimeF = (float)deltaTime;
     deltaTimeStart = now;
 
+    glm::vec2 cursorPosInScreen = { gdl::WiiInput::GetCursorPosition().x , gdl::WiiInput::GetCursorPosition().y };
+
     frogState.pos += frogState.velocity * deltaTimeF;
     frogState.velocity += glm::vec2(0.f, -9.81f) * deltaTimeF;
 
@@ -87,8 +89,10 @@ void Template::Update()
 
     bool frogOnGround = frogState.pos.y <= groundY && frogState.velocity.y <= 0.f;
 
-    if (gdl::WiiInput::ButtonPress(WPAD_BUTTON_A)) {
-        if (frogOnGround) {
+    if (frogOnGround) {
+        frogState.pos.x = screenToWorld(cursorPosInScreen).x;
+
+        if (gdl::WiiInput::ButtonPress(WPAD_BUTTON_A)) {
             frogState.velocity += glm::vec2(0.f, 6.f);
         }
     }
@@ -163,7 +167,7 @@ void Template::Draw()
 
     }
 
-    glm::vec2 frogRenderPos = frogState.pos * worldToRenderScale + renderOffset;
+    glm::vec2 frogRenderPos = worldToScreen(frogState.pos);
     frogSit.Put(
       frogRenderPos.x, frogRenderPos.y, gdl::Color::White, gdl::Centered, gdl::Centered, 0.1f, 0.f
     );
@@ -341,4 +345,12 @@ void Template::DrawMenu(int x, int y, int w)
     {
         gdl_assert(false, "Assert button pressed!");
     }
+}
+
+glm::vec2 Template::screenToWorld(glm::vec2 p_screen) {
+    return p_screen / glm::vec2(worldToScreenScale, -worldToScreenScale) - renderOffset / worldToScreenScale;
+}
+
+glm::vec2 Template::worldToScreen(glm::vec2 p_world) {
+    return p_world * glm::vec2(worldToScreenScale, -worldToScreenScale) + renderOffset;
 }

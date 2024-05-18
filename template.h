@@ -31,8 +31,8 @@ class Template
     float elapsed;
     FrogState frogState;
     float groundY = 0.f;
-    glm::vec2 renderOffset = glm::vec2(320.f, 480.f * .75f );
-    glm::vec2 worldToRenderScale = { 480.f / 4.f, -480.f / 4.f };
+    float worldToScreenScale = 480.f / 4.f;
+    glm::vec2 renderOffset = glm::vec2(320.f, 240.f);
 
     // Snacks
     gdl::Image flySnack;
@@ -52,4 +52,7 @@ class Template
         void DrawSprites();
         void DrawPahaaAnimaatio();
         void UpdatePahaaAnimaatio();
+
+        glm::vec2 screenToWorld(glm::vec2 p_screen);
+        glm::vec2 worldToScreen(glm::vec2 p_world);
 };
