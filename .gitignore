@@ -34,3 +34,5 @@
 *.elf
 
 build/
+
+.DS_Store

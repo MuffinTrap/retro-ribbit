@@ -16,6 +16,8 @@
 #include "random_sammakko_png.h"
 #include "random_sammakko_super_isku_png.h"
 #include "lampi_png.h"
+#include "kieli_png.h"
+#include "pahaa_png.h"
 
 static u64 deltaTimeStart = 0;
 static u64 programStart = 0;
@@ -29,6 +31,15 @@ void Template::Init()
 {
     frogSit.LoadImageBuffer(random_sammakko_png, random_sammakko_png_size, gdl::Nearest, gdl::RGBA8);
     frogLick.LoadImageBuffer(random_sammakko_super_isku_png, random_sammakko_super_isku_png_size, gdl::Nearest, gdl::RGBA8);
+
+    pahaa.LoadImageBuffer(pahaa_png, pahaa_png_size, gdl::Nearest, gdl::RGBA8);
+    kieli.LoadImageBuffer(kieli_png, kieli_png_size, gdl::Nearest, gdl::RGBA8);
+
+    gdl::SpriteSetConfig pahaacf = pahaa_sprites.CreateConfig(4, 582/4, 144);
+    pahaa_sprites.LoadSprites(pahaacf, &pahaa);
+    pahaa_timer = 0;
+    pahaa_interval = 0.2;
+    pahaa_frame = 0;
 
     pond.LoadImageBuffer(lampi_png, lampi_png_size, gdl::Nearest, gdl::RGBA8);
     
@@ -50,7 +61,24 @@ void Template::Init()
 
 void Template::Update()
 {
+    u64 now = gettime();
+    elapsed=ticks_to_millisecs(now - programStart);
+    deltaTime = (double)(now - deltaTimeStart) / (double)(TB_TIMER_CLOCK * 1000); // division is to convert from ticks to seconds
+    deltaTimeStart = now;
+}
 
+void Template::UpdatePahaaAnimaatio()
+{
+    pahaa_timer += deltaTime;
+    if (pahaa_timer >= pahaa_interval)
+    {
+        pahaa_timer = 0;
+        pahaa_frame += 1;
+        if (pahaa_frame > 3)
+        {
+            pahaa_frame = 0;
+        }
+    }
 }
 
 void DrawTextDouble(const char* text, short x, short y, float scale, gdl::FFont* font)
@@ -113,6 +141,11 @@ void Template::Draw()
 */
 
     // DrawSprites();
+}
+
+void Template::DrawPahaaAnimaatio()
+{
+    pahaa_sprites.Put(0, 0, pahaa_frame, gdl::Color::White, 0, 0, 1.0f);
 }
 
 static void DrawButtons(short x, short y, short size, gdl::FFont* font)
@@ -223,10 +256,7 @@ void Template::DrawSprites()
 
 void Template::DrawTimingInfo(int x, int y, float scale)
 {
-    u64 now = gettime();
-    float temp=ticks_to_millisecs(now - programStart);
-    double deltaTime = (double)(now - deltaTimeStart) / (double)(TB_TIMER_CLOCK * 1000); // division is to convert from ticks to seconds
-    deltaTimeStart = now;
+    
     float ystep = ibmFont.GetHeight()*scale;
     ibmFont.Printf(x+4, y + ystep * 0+4, scale, gdl::Color::Black, "Deltatime %f", deltaTime);
     ibmFont.Printf(x, y + ystep * 0, scale, gdl::Color::LightRed, "Deltatime %f", deltaTime);
@@ -234,8 +264,8 @@ void Template::DrawTimingInfo(int x, int y, float scale)
     ibmFont.Printf(x+4, y + ystep * 1+4, scale, gdl::Color::Black, "Normalized Deltatime: %f", gdl::Delta);
     ibmFont.Printf(x, y + ystep * 1, scale, gdl::Color::LightRed, "Normalized Deltatime: %f", gdl::Delta);
 
-    ibmFont.Printf(x+4, y + ystep * 2+4, scale, gdl::Color::Black, "Elapsed milliseconds: %f", temp);
-    ibmFont.Printf(x, y + ystep * 2, scale, gdl::Color::LightRed, "Elapsed milliseconds: %f", temp);
+    ibmFont.Printf(x+4, y + ystep * 2+4, scale, gdl::Color::Black, "Elapsed milliseconds: %f", elapsed);
+    ibmFont.Printf(x, y + ystep * 2, scale, gdl::Color::LightRed, "Elapsed milliseconds: %f", elapsed);
 
     ibmFont.Printf(x+4, y + ystep * 3+4, scale, gdl::Color::Black, "Music elapsed: %f", sampleMusic.GetElapsed());
     ibmFont.Printf(x, y + ystep * 3, scale, gdl::Color::LightRed, "Music elapsed: %f", sampleMusic.GetElapsed());
