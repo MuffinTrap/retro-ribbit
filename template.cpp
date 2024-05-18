@@ -12,6 +12,7 @@
 #include "font8x16_png.h"
 #include "sample3_ogg.h"
 #include "blipSelect_wav.h"
+#include "fly_png.h"
 
 #include "random_sammakko_png.h"
 #include "random_sammakko_super_isku_png.h"
@@ -42,6 +43,10 @@ void Template::Init()
     pahaa_frame = 0;
 
     pond.LoadImageBuffer(lampi_png, lampi_png_size, gdl::Nearest, gdl::RGBA8);
+
+    flySnack.LoadImageBuffer(fly_png, fly_png_size, gdl::Nearest, gdl::RGBA8);
+    gdl::SpriteSetConfig flyCfg = flySnackSprites.CreateConfig(2, 360/2, 158);
+    flySnackSprites.LoadSprites(flyCfg, &flySnack);
     
     pointerImage.LoadImageBuffer(pointer_png, pointer_png_size, gdl::Nearest, gdl::RGBA8);
 

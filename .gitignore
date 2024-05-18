@@ -33,6 +33,11 @@
 *.dol
 *.elf
 
+# Object files from images and sound
 build/
 
 .DS_Store
+# Project files
+# KDevelop
+.kdev4/
+*.kdev4

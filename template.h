@@ -2,10 +2,10 @@
 
 #include <mgdl-wii.h>
 #include "frog.h"
+#include "snack.h"
 
 class Template
 {
-    gdl::Image barb;
     gdl::Image mel_image;
     gdl::SpriteSet mel_sprites;
     gdl::Image ibmFontImage;
@@ -33,6 +33,10 @@ class Template
     float groundY = 0.f;
     glm::vec2 renderOffset = glm::vec2(320.f, 480.f * .75f );
     glm::vec2 worldToRenderScale = { 480.f / 4.f, -480.f / 4.f };
+
+    // Snacks
+    gdl::Image flySnack;
+    gdl::SpriteSet flySnackSprites;
 
     public:
         Template();
