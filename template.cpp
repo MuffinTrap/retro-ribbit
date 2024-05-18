@@ -94,11 +94,11 @@ void Template::Update()
     if (frogOnGround) {
         glm::vec2 frogWalkDesirePos = screenToWorld(cursorPosInScreen);
         glm::vec2 frogWalkDiff = frogWalkDesirePos - frogState.pos;
-        if (frogWalkDiff.length() > 0.001f) {
-            frogState.pos.x += (frogWalkDiff * frog_walk_speed * deltaTimeF).x;
+        if (glm::abs(frogWalkDiff.x) > 0.1f) {
+            frogState.velocity = glm::vec2((frogWalkDiff * frog_walk_speed).x, 1.5f);
         }
 
-        if (gdl::WiiInput::ButtonPress(WPAD_BUTTON_A)) {
+        if (gdl::WiiInput::ButtonHeld(WPAD_BUTTON_A)) {
             frogState.velocity = glm::vec2(0.f, 6.f);
         }
     }
