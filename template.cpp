@@ -7,6 +7,8 @@
 
 #include <ogc/lwp_watchdog.h>
 
+#include "const.h"
+
 #include "barb_png.h"
 #include "mel_tiles_png.h"
 #include "pointer_png.h"
@@ -90,10 +92,14 @@ void Template::Update()
     bool frogOnGround = frogState.pos.y <= groundY && frogState.velocity.y <= 0.f;
 
     if (frogOnGround) {
-        frogState.pos.x = screenToWorld(cursorPosInScreen).x;
+        glm::vec2 frogWalkDesirePos = screenToWorld(cursorPosInScreen);
+        glm::vec2 frogWalkDiff = frogWalkDesirePos - frogState.pos;
+        if (frogWalkDiff.length() > 0.001f) {
+            frogState.pos.x += (frogWalkDiff * frog_walk_speed * deltaTimeF).x;
+        }
 
         if (gdl::WiiInput::ButtonPress(WPAD_BUTTON_A)) {
-            frogState.velocity += glm::vec2(0.f, 6.f);
+            frogState.velocity = glm::vec2(0.f, 6.f);
         }
     }
 
