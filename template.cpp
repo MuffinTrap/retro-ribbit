@@ -64,7 +64,24 @@ void Template::Update()
     u64 now = gettime();
     elapsed=ticks_to_millisecs(now - programStart);
     deltaTime = (double)(now - deltaTimeStart) / (double)(TB_TIMER_CLOCK * 1000); // division is to convert from ticks to seconds
+    deltaTimeF = (float)deltaTime;
     deltaTimeStart = now;
+
+    frogState.pos += frogState.velocity * deltaTimeF;
+    frogState.velocity += glm::vec2(0.f, -9.81f) * deltaTimeF;
+
+    if (frogState.pos.y <= groundY) {
+        frogState.pos.y = groundY;
+        frogState.velocity.y = 0.f;
+    }
+
+    bool frogOnGround = frogState.pos.y <= groundY && frogState.velocity.y <= 0.f;
+
+    if (gdl::WiiInput::ButtonPress(WPAD_BUTTON_A)) {
+        if (frogOnGround) {
+            frogState.velocity += glm::vec2(0.f, 6.f);
+        }
+    }
 }
 
 void Template::UpdatePahaaAnimaatio()
@@ -123,6 +140,11 @@ void Template::Draw()
         );
 
     }
+
+    glm::vec2 frogRenderPos = frogState.pos * worldToRenderScale + renderOffset;
+    frogSit.Put(
+      frogRenderPos.x, frogRenderPos.y, gdl::Color::White, gdl::Centered, gdl::Centered, 0.1f, 0.f
+    );
 
     // gdl::DrawBox(cp.x, cp.y, cp.x+ frogSit.Xsize() * frogScale, cp.y + frogSit.Ysize() * frogScale, gdl::Color::Red);
     float fontScale = 2.0f;

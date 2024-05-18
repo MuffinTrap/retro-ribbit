@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mgdl-wii.h>
+#include "frog.h"
 
 class Template
 {
@@ -26,7 +27,12 @@ class Template
     double pahaa_interval;
     int pahaa_frame;
     double deltaTime;
+    float deltaTimeF;
     float elapsed;
+    FrogState frogState;
+    float groundY = 0.f;
+    glm::vec2 renderOffset = glm::vec2(320.f, 480.f * .75f );
+    glm::vec2 worldToRenderScale = { 480.f / 4.f, -480.f / 4.f };
 
     public:
         Template();
