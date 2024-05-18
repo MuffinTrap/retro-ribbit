@@ -18,6 +18,15 @@ class Template
     gdl::Image frogSit;
     gdl::Image frogLick;
     gdl::Image pond;
+    gdl::Image pahaa;
+    gdl::Image kieli;
+    gdl::SpriteSet pahaa_sprites;
+    gdl::SpriteSet kieli_sprites;
+    double pahaa_timer;
+    double pahaa_interval;
+    int pahaa_frame;
+    double deltaTime;
+    float elapsed;
 
     public:
         Template();
@@ -30,4 +39,6 @@ class Template
         void DrawInputInfo(int x, int y);
         void DrawTimingInfo(int x, int y, float scale);
         void DrawSprites();
+        void DrawPahaaAnimaatio();
+        void UpdatePahaaAnimaatio();
 };
