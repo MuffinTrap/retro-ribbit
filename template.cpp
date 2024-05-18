@@ -31,7 +31,7 @@ Template::Template()
 
 void Template::Init()
 {
-    frogScale = 1.0f;
+    frogScale = 0.5f;
     frogSit.LoadImageBuffer(random_sammakko_png, random_sammakko_png_size, gdl::Nearest, gdl::RGBA8);
     frogLick.LoadImageBuffer(random_sammakko_super_isku_png, random_sammakko_super_isku_png_size, gdl::Nearest, gdl::RGBA8);
 
@@ -146,33 +146,25 @@ void Template::Draw()
     pond.Put(gdl::ScreenCenterX, gdl::ScreenCenterY, gdl::Color::White,
              gdl::AlignmentModes::Centered, gdl::AlignmentModes::Centered, 1.5f, 0.0f);
 
-    gdl::vec2 cp = gdl::WiiInput::GetCursorPosition();
-
-
     frogRollRadians = gdl::WiiInput::GetRoll();
+    glm::vec2 frogRenderPos = worldToScreen(frogState.pos);
     if (gdl::WiiInput::ButtonHeld(WPAD_BUTTON_A)) 
     {
         float sitWh = frogSit.Xsize() /2;
         float lickW = frogLick.Xsize();
         float lickCenterX = lickW - sitWh;
         frogLick.Put(
-            cp.x, cp.y,
+            frogRenderPos.x, frogRenderPos.y,
             gdl::Color::White, lickCenterX, gdl::Centered, frogScale, frogRollRadians / PI * 180.f
         );
     }
     else
     {
         frogSit.Put(
-            cp.x,cp.y,
-            gdl::Color::White, gdl::Centered, gdl::Centered, frogScale, 0.0f
+            frogRenderPos.x, frogRenderPos.y,
+            gdl::Color::White, gdl::Centered, gdl::Centered, frogScale, frogRollRadians / PI * 180.0f
         );
-
     }
-
-    glm::vec2 frogRenderPos = worldToScreen(frogState.pos);
-    frogSit.Put(
-      frogRenderPos.x, frogRenderPos.y, gdl::Color::White, gdl::Centered, gdl::Centered, 0.1f, 0.f
-    );
 
     fly.Draw(&ibmFont);
 
@@ -201,9 +193,7 @@ void Template::DrawInputInfo(int x, int y)
 
 glm::vec2 Template::GetTongueHitboxCenter()
 {
-    gdl::vec2 cp = gdl::WiiInput::GetCursorPosition();
-    glm::vec2 frogRenderPos= glm::vec2(cp.x, cp.y);
-    // glm::vec2 frogRenderPos = GetFrogRenderPos();
+    glm::vec2 frogRenderPos = GetFrogRenderPos();
     // Rotate offset
     float rad = frogRollRadians;// + PI;
     float cosRoll = cos(rad);
