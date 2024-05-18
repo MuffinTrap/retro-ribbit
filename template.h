@@ -34,10 +34,17 @@ class Template
     float worldToScreenScale = 480.f / 4.f;
     glm::vec2 renderOffset = glm::vec2(320.f, 240.f);
 
+    // Offset from frog position to where the hitbox is
+    glm::vec2 tongueHitBoxOffset;
+    float tongueHitBoxSize;
+    float frogRollRadians;
+
     // Snacks
     gdl::Image flySnack;
     gdl::SpriteSet flySnackSprites;
     Snack fly;
+
+    gdl::Sound rouskis;
 
     public:
         Template();
@@ -46,13 +53,14 @@ class Template
         void Draw();
 
     private:
-        void DrawMenu(int x, int y, int width);
         void DrawInputInfo(int x, int y);
         void DrawTimingInfo(int x, int y, float scale);
-        void DrawSprites();
         void DrawPahaaAnimaatio();
         void UpdatePahaaAnimaatio();
 
         glm::vec2 screenToWorld(glm::vec2 p_screen);
         glm::vec2 worldToScreen(glm::vec2 p_world);
+        glm::vec2 GetTongueHitboxCenter();
+        glm::vec2 GetFrogRenderPos();
+        float frogScale;
 };

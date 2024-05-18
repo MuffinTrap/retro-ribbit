@@ -14,8 +14,7 @@ class Snack{
 	float maxSpeed;
 	float maxForce;
 
-	private:
-		void SeekTarget(float deltaTime);
+	void SeekTarget(float deltaTime);
 	glm::vec2 position;
 	glm::vec2 direction;
 	glm::vec2 velocity;
