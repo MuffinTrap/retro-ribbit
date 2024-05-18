@@ -107,15 +107,20 @@ void Template::Draw()
 
     gdl::vec2 frogCenter = gdl::vec2(frogSit.Xsize()/2, frogSit.Ysize()/2);
 
+    float frogRoll = gdl::WiiInput::GetRoll();
     if (gdl::WiiInput::ButtonHeld(WPAD_BUTTON_A)) 
     {
-        frogLick.Put(cp.x + frogCenter.x, cp.y + frogCenter.y,
-        gdl::Color::White, gdl::RJustify,gdl::RJustify, frogScale, 0.0f);
+        frogLick.Put(
+            cp.x + frogCenter.x, cp.y + frogCenter.y,
+            gdl::Color::White, gdl::RJustify,gdl::RJustify, frogScale, frogRoll / PI * 180.f
+        );
     }
     else
     {
-        frogSit.Put(cp.x + frogCenter.x, cp.y + frogCenter.y,
-        gdl::Color::White, gdl::RJustify,gdl::RJustify, frogScale, 0.0f);
+        frogSit.Put(
+            cp.x + frogCenter.x, cp.y + frogCenter.y,
+            gdl::Color::White, gdl::RJustify,gdl::RJustify, frogScale, 0.0f
+        );
 
     }
 

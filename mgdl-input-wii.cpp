@@ -29,6 +29,10 @@ gdl::vec2 gdl::WiiInput::GetNunchukJoystickDirection(float deadzone)
   return gdl::vec2(mote1.nunchukJoystickDirectionX, mote1.nunchukJoystickDirectionY);
 }
 
+float gdl::WiiInput::GetRoll() {
+  return mote1.roll;
+}
+
 void gdl::WiiInput::Init() {
 	initStatus = WPAD_Init();
   WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_BTNS_ACC_IR);
@@ -38,8 +42,10 @@ void gdl::WiiInput::Init() {
 void gdl::WiiInput::StartFrame() {
   WPAD_ScanPads();  // Scan the Wiimotes
 
-  ir_t ir;
-  WPAD_IR(WPAD_CHAN_0, &ir);
+  WPADData *data1 = WPAD_Data(WPAD_CHAN_0);
+
+  const ir_t &ir = data1->ir;
+  //WPAD_IR(WPAD_CHAN_0, &ir);
   mote1.cursorX = ir.x;
   mote1.cursorY = ir.y;
 
@@ -49,8 +55,8 @@ void gdl::WiiInput::StartFrame() {
 
   mote1.nunchukJoystickDirectionX=0.0f;
   mote1.nunchukJoystickDirectionY=0.0f;
-  expansion_t ex;
-  WPAD_Expansion(WPAD_CHAN_0, &ex);
+  const expansion_t &ex = data1->exp;
+  //WPAD_Expansion(WPAD_CHAN_0, &ex);
   if (ex.type == WPAD_EXP_NUNCHUK)
   {
       joystick_t n = ex.nunchuk.js;
@@ -68,5 +74,7 @@ void gdl::WiiInput::StartFrame() {
           mote1.nunchukJoystickDirectionY = diry * n.mag;
       }
   }
+
+  mote1.roll = data1->orient.roll / 180.f * PI;
 }
 
