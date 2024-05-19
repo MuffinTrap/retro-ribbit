@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<app version="1">
+  <name>Frog Snack</name>
+  <coder>Team Froggo</coder>
+  <version>1.0</version>
+  <release_date>20240519</release_date>
+  <short_description>Frog Snack</short_description>
+  <long_description> Game made for Retro Game Jam 2024
+by muffintrap, moziz and SuperRuusu. 
+Made with MTek-GDL muffintrap fork.
+   </long_description>
+</app>
