@@ -23,6 +23,7 @@ class Template
     gdl::Sound slurps;
     gdl::MenuCreator menu;
     gdl::Image logo;
+    gdl::Image foreground_grass;
 
     // Frogs
     gdl::Image frogSit;

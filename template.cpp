@@ -24,6 +24,7 @@
 #include "logo_png.h"
 #include "pelimusa_ogg.h"
 #include "woodwind_ogg.h"
+#include "nurmikko_medium_png.h"
 
 static u64 deltaTimeStart = 0;
 static u64 programStart = 0;
@@ -54,6 +55,7 @@ void Template::Init()
 
     pond.LoadImageBuffer(wide_bg_png, wide_bg_png_size, gdl::Nearest, gdl::RGBA8);
     logo.LoadImageBuffer(logo_png, logo_png_size, gdl::Nearest, gdl::RGBA8);
+    foreground_grass.LoadImageBuffer(nurmikko_medium_png, nurmikko_medium_png_size, gdl::Nearest, gdl::RGBA8);
 
     flySnack.LoadImageBuffer(fly_png, fly_png_size, gdl::Nearest, gdl::RGBA8);
     gdl::SpriteSetConfig flyCfg = flySnackSprites.CreateConfig(2, 360/2, 158);
@@ -211,6 +213,8 @@ void Template::DrawGameLoop()
     }
 
     DrawFrog();
+
+    foreground_grass.Put(0, gdl::ScreenYres - foreground_grass.Ysize(), gdl::Color::White, 0, 0, 1.f);
 
     // Input
     short top = 32;
