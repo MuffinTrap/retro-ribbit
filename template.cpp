@@ -218,7 +218,7 @@ void Template::DrawInputInfo(int x, int y)
     // Draw cursor
     gdl::vec2 cp = gdl::WiiInput::GetCursorPosition();
 
-    pointerImage.Put(cp.x,cp.y,gdl::Color::White, 0, 0, 1.0f);
+    pointerImage.Put(cp.x,cp.y,gdl::Color::White, gdl::Centered, gdl::Centered, 0.25f);
 }
 
 glm::vec2 Template::GetTongueHitboxCenter()
