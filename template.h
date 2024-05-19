@@ -24,15 +24,18 @@ class Template
 
     // Frogs
     gdl::Image frogSit;
-    gdl::Image frogLick;
     gdl::Image pond;
     gdl::Image pahaa;
-    gdl::Image kieli;
+    gdl::Image kieli_frames[3];
     gdl::SpriteSet pahaa_sprites;
     gdl::SpriteSet kieli_sprites;
     double pahaa_timer;
     double pahaa_interval;
     int pahaa_frame;
+    double kieli_timer;
+    double kieli_interval;
+    int kieli_frame;
+    int kieli_animation_direction;
     double deltaTime;
     float deltaTimeF;
     float elapsed;
@@ -62,7 +65,7 @@ class Template
     private:
         void DrawInputInfo(int x, int y);
         void DrawTimingInfo(int x, int y, float scale);
-        void DrawPahaaAnimaatio();
+        void DrawPahaaAnimaatio(int x, int y);
         void UpdatePahaaAnimaatio();
 
         glm::vec2 screenToWorld(glm::vec2 p_screen);
@@ -78,4 +81,10 @@ class Template
 
         void UpdateStartScreen();
         void DrawStartScreen();
+
+        // Drawing and updating the frog with current animation
+        void ChangeFrogAnimation(FrogAnimation newAnimation);
+        void DrawFrog();
+        void UpdateFrog();
+        void UpdateLickAnimation();
 };

@@ -15,9 +15,10 @@
 #include "fly_png.h"
 
 #include "random_sammakko_png.h"
-#include "random_sammakko_super_isku_png.h"
+#include "lick_frame1_png.h"
+#include "lick_frame2_png.h"
+#include "lick_frame3_png.h"
 #include "wide_bg_png.h"
-#include "kieli_png.h"
 #include "pahaa_png.h"
 #include "rouskis_wav.h"
 #include "logo_png.h"
@@ -33,10 +34,15 @@ void Template::Init()
 {
     frogScale = 0.5f;
     frogSit.LoadImageBuffer(random_sammakko_png, random_sammakko_png_size, gdl::Nearest, gdl::RGBA8);
-    frogLick.LoadImageBuffer(random_sammakko_super_isku_png, random_sammakko_super_isku_png_size, gdl::Nearest, gdl::RGBA8);
 
     pahaa.LoadImageBuffer(pahaa_png, pahaa_png_size, gdl::Nearest, gdl::RGBA8);
-    kieli.LoadImageBuffer(kieli_png, kieli_png_size, gdl::Nearest, gdl::RGBA8);
+    kieli_frames[0].LoadImageBuffer(lick_frame1_png, lick_frame1_png_size, gdl::Nearest, gdl::RGBA8);
+    kieli_frames[1].LoadImageBuffer(lick_frame2_png, lick_frame2_png_size, gdl::Nearest, gdl::RGBA8);
+    kieli_frames[2].LoadImageBuffer(lick_frame3_png, lick_frame3_png_size, gdl::Nearest, gdl::RGBA8);
+    kieli_timer = 0;
+    kieli_interval = 0.1;
+    kieli_frame = 0;
+    kieli_animation_direction = 1;
 
     gdl::SpriteSetConfig pahaacf = pahaa_sprites.CreateConfig(4, 582/4, 144);
     pahaa_sprites.LoadSprites(pahaacf, &pahaa);
@@ -121,16 +127,24 @@ void Template::UpdateGameLoop()
             frogState.velocity = glm::normalize(frogWalkDiff) * frog_jump_speed_high;
         }
     }
+    else
+    {
+        if (gdl::WiiInput::ButtonHeld(WPAD_BUTTON_B)) {
+            ChangeFrogAnimation(FrogAnimation::Lick);
+        }
+    }
+
+    UpdateFrog();
 
     fly.Update(deltaTime);
 
     // Check if the fly is caught
-    bool tongueOut = gdl::WiiInput::ButtonHeld(WPAD_BUTTON_A);
+    bool tongueOut = frogState.currentAnimation == FrogAnimation::Lick && kieli_frame >= 1;
     if (tongueOut && glm::length(fly.position - GetTongueHitboxCenter()) < tongueHitBoxSize/2)
     {
         // Catch the fly
         fly.position = glm::vec2(gdl::ScreenCenterX, -100);
-        rouskis.Play(1.0f, 100.0f);
+        frogState.flyCaught = true;
     }
 }
 
@@ -144,6 +158,7 @@ void Template::UpdatePahaaAnimaatio()
         if (pahaa_frame > 3)
         {
             pahaa_frame = 0;
+            ChangeFrogAnimation(FrogAnimation::Sit);
         }
     }
 }
@@ -175,31 +190,17 @@ void Template::DrawGameLoop()
     pond.Put(gdl::ScreenCenterX, gdl::ScreenCenterY, gdl::Color::White,
              gdl::AlignmentModes::Centered, gdl::AlignmentModes::Centered, 1.0f, 0.0f);
 
-    frogRollRadians = gdl::WiiInput::GetRoll();
-    glm::vec2 frogRenderPos = worldToScreen(frogState.pos);
-    if (gdl::WiiInput::ButtonHeld(WPAD_BUTTON_A)) 
-    {
-        float sitWh = frogSit.Xsize() /2;
-        float lickW = frogLick.Xsize();
-        float lickCenterX = lickW - sitWh;
-        frogLick.Put(
-            frogRenderPos.x, frogRenderPos.y,
-            gdl::Color::White, lickCenterX, gdl::Centered, frogScale, frogRollRadians / PI * 180.f
-        );
-    }
-    else
-    {
-        frogSit.Put(
-            frogRenderPos.x, frogRenderPos.y,
-            gdl::Color::White, gdl::Centered, gdl::Centered, frogScale, frogRollRadians / PI * 180.0f
-        );
-    }
 
     fly.Draw(&ibmFont);
 
-    // Draw tongue catch hitbox
-    glm::vec2 hb = GetTongueHitboxCenter();
-    gdl::DrawBox(hb.x - tongueHitBoxSize/2, hb.y - tongueHitBoxSize/2, hb.x + tongueHitBoxSize/2, hb.y + tongueHitBoxSize/2, gdl::Color::Red);
+    // DEBUG Draw tongue catch hitbox
+    if (frogState.currentAnimation == FrogAnimation::Lick && kieli_frame >= 1)
+    {
+        glm::vec2 hb = GetTongueHitboxCenter();
+        gdl::DrawBox(hb.x - tongueHitBoxSize/2, hb.y - tongueHitBoxSize/2, hb.x + tongueHitBoxSize/2, hb.y + tongueHitBoxSize/2, gdl::Color::Red);
+    }
+
+    DrawFrog();
 
     // Input
     short top = 32;
@@ -207,9 +208,9 @@ void Template::DrawGameLoop()
     DrawInputInfo(left, top);
 }
 
-void Template::DrawPahaaAnimaatio()
+void Template::DrawPahaaAnimaatio(int x, int y)
 {
-    pahaa_sprites.Put(0, 0, pahaa_frame, gdl::Color::White, 0, 0, 1.0f);
+    pahaa_sprites.Put(x, y, pahaa_frame, gdl::Color::White, gdl::Centered, gdl::Centered, frogScale, RadToDeg(frogRollRadians));
 }
 
 void Template::DrawInputInfo(int x, int y)
@@ -283,4 +284,95 @@ void Template::DrawStartScreen()
                    gdl::ScreenCenterY + gdl::ScreenYres/6 + ibmFont.GetHeight() * 2.0f * infoScale,
                    infoScale,
                    &ibmFont, gdl::Color::LightRed);
+}
+
+void Template::ChangeFrogAnimation(FrogAnimation newAnimation)
+{
+    if (frogState.currentAnimation == newAnimation)
+    {
+        return;
+    }
+    if (newAnimation == FrogAnimation::Eat)
+    {
+        frogState.flyCaught = false;
+        rouskis.Play(1.0f, 100.0f);
+    }
+    frogState.currentAnimation = newAnimation;
+}
+
+void Template::UpdateFrog()
+{
+    switch (frogState.currentAnimation)
+    {
+        case FrogAnimation::Sit:
+            // No animation
+            break;
+        case FrogAnimation::Lick:
+            UpdateLickAnimation();
+            break;
+        case FrogAnimation::Eat:
+            UpdatePahaaAnimaatio();
+            break;
+    };
+}
+
+void Template::UpdateLickAnimation()
+{
+    kieli_timer += deltaTime;
+    if (kieli_timer >= kieli_interval)
+    {
+        kieli_timer = 0;
+        kieli_frame += kieli_animation_direction;
+        if (kieli_animation_direction > 0 && kieli_frame > 2)
+        {
+            // Start going back
+            kieli_animation_direction = -1;
+            kieli_frame += kieli_animation_direction;
+        }
+        else if (kieli_animation_direction < 0 && kieli_frame < 0 )
+        {
+            // End
+            kieli_frame = 0;
+            kieli_animation_direction = 1;
+            if (frogState.flyCaught)
+            {
+                ChangeFrogAnimation(FrogAnimation::Eat);
+            }
+            else
+            {
+                ChangeFrogAnimation(FrogAnimation::Sit);
+            }
+        }
+    }
+}
+
+void Template::DrawFrog()
+{
+    frogRollRadians = gdl::WiiInput::GetRoll();
+    glm::vec2 frogRenderPos = worldToScreen(frogState.pos);
+    switch (frogState.currentAnimation)
+    {
+        case FrogAnimation::Sit:
+            frogSit.Put(
+                frogRenderPos.x, frogRenderPos.y,
+                gdl::Color::White, gdl::Centered, gdl::Centered, frogScale, frogRollRadians / PI * 180.0f
+            );
+            break;
+        case FrogAnimation::Lick:
+        {
+            ibmFont.Printf(10, 10, 1.0f, gdl::Color::Red, "Lick: timer%f frame%d", kieli_timer, kieli_frame);
+            float sitWh = frogSit.Xsize() /2;
+            // depending on the frame of lick animation
+            float lickW = kieli_frames[kieli_frame].Xsize();
+            float lickCenterX = lickW - sitWh;
+            kieli_frames[kieli_frame].Put(
+                frogRenderPos.x, frogRenderPos.y,
+                gdl::Color::White, lickCenterX, gdl::Centered, frogScale, frogRollRadians / PI * 180.f
+            );
+        }
+            break;
+        case FrogAnimation::Eat:
+            DrawPahaaAnimaatio(frogRenderPos.x, frogRenderPos.y);
+            break;
+    };
 }
