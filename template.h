@@ -44,7 +44,7 @@ class Template
     FrogState frogState;
     float groundY = 0.f;
     float worldToScreenScale = 480.f / 4.f;
-    glm::vec2 renderOffset = glm::vec2(320.f, 240.f);
+    glm::vec2 renderOffset = glm::vec2(320.f, 480.f * 0.75f);
 
     // Offset from frog position to where the hitbox is
     glm::vec2 tongueHitBoxOffset;
