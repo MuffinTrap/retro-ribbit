@@ -210,7 +210,7 @@ void Template::DrawGameLoop()
 
 void Template::DrawPahaaAnimaatio(int x, int y)
 {
-    pahaa_sprites.Put(x, y, pahaa_frame, gdl::Color::White, gdl::Centered, gdl::Centered, frogScale, RadToDeg(frogRollRadians));
+    pahaa_sprites.Put(x, y, pahaa_frame, gdl::Color::White, gdl::Centered, gdl::Centered, frogScale * 2.f, RadToDeg(frogRollRadians));
 }
 
 void Template::DrawInputInfo(int x, int y)
