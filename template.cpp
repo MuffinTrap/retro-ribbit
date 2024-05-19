@@ -27,7 +27,6 @@ static u64 programStart = 0;
 
 Template::Template()
 {
-
 }
 
 void Template::Init()
@@ -100,6 +99,7 @@ void Template::Update()
 void Template::UpdateGameLoop()
 {
     glm::vec2 cursorPosInScreen = { gdl::WiiInput::GetCursorPosition().x , gdl::WiiInput::GetCursorPosition().y };
+    glm::vec2 cursorPosInWorld = screenToWorld(cursorPosInScreen);
 
     frogState.pos += frogState.velocity * deltaTimeF;
     frogState.velocity += glm::vec2(0.f, -9.81f) * deltaTimeF;
@@ -112,14 +112,13 @@ void Template::UpdateGameLoop()
     bool frogOnGround = frogState.pos.y <= groundY && frogState.velocity.y <= 0.f;
 
     if (frogOnGround) {
-        glm::vec2 frogWalkDesirePos = screenToWorld(cursorPosInScreen);
-        glm::vec2 frogWalkDiff = frogWalkDesirePos - frogState.pos;
+        glm::vec2 frogWalkDiff = cursorPosInWorld - frogState.pos;
         if (glm::abs(frogWalkDiff.x) > 0.1f) {
-            frogState.velocity = glm::vec2((frogWalkDiff * frog_walk_speed).x, 1.5f);
+            frogState.velocity = glm::vec2((frogWalkDiff * frog_walk_speed).x, frog_jump_speed_small);
         }
 
         if (gdl::WiiInput::ButtonHeld(WPAD_BUTTON_A)) {
-            frogState.velocity = glm::vec2(0.f, 6.f);
+            frogState.velocity = glm::normalize(frogWalkDiff) * frog_jump_speed_high;
         }
     }
 
@@ -243,7 +242,7 @@ glm::vec2 Template::GetFrogRenderPos()
 }
 
 glm::vec2 Template::screenToWorld(glm::vec2 p_screen) {
-    return p_screen / glm::vec2(worldToScreenScale, -worldToScreenScale) - renderOffset / worldToScreenScale;
+    return p_screen / glm::vec2(worldToScreenScale, -worldToScreenScale) - glm::vec2(renderOffset.x, -renderOffset.y) / worldToScreenScale;
 }
 
 glm::vec2 Template::worldToScreen(glm::vec2 p_world) {
