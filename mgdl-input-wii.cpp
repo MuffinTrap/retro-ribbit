@@ -46,8 +46,8 @@ void gdl::WiiInput::StartFrame() {
 
   const ir_t &ir = data1->ir;
   //WPAD_IR(WPAD_CHAN_0, &ir);
-  mote1.cursorX = ir.x;
-  mote1.cursorY = ir.y;
+  mote1.cursorX = ir.x * 1.67f - 16.f;
+  mote1.cursorY = ir.y * 1.2f - 16.f;
 
   mote1.pressedButtons = WPAD_ButtonsDown(0);
   mote1.releasedButtons = WPAD_ButtonsUp(0);
