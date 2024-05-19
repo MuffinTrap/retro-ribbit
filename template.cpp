@@ -47,7 +47,7 @@ void Template::Init()
     kieli_frame = 0;
     kieli_animation_direction = 1;
 
-    gdl::SpriteSetConfig pahaacf = pahaa_sprites.CreateConfig(4, 582/4, 144);
+    gdl::SpriteSetConfig pahaacf = pahaa_sprites.CreateConfig(4, 582/4, 138);
     pahaa_sprites.LoadSprites(pahaacf, &pahaa);
     pahaa_timer = 0;
     pahaa_interval = 0.2;
