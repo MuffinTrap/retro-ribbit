@@ -206,11 +206,13 @@ void Template::DrawGameLoop()
     fly.Draw(&ibmFont);
 
     // DEBUG Draw tongue catch hitbox
+    /*
     if (frogState.currentAnimation == FrogAnimation::Lick && kieli_frame >= 1)
     {
         glm::vec2 hb = GetTongueHitboxCenter();
         gdl::DrawBox(hb.x - tongueHitBoxSize/2, hb.y - tongueHitBoxSize/2, hb.x + tongueHitBoxSize/2, hb.y + tongueHitBoxSize/2, gdl::Color::Red);
     }
+    */
 
     DrawFrog();
 
@@ -387,7 +389,7 @@ void Template::DrawFrog()
             break;
         case FrogAnimation::Lick:
         {
-            ibmFont.Printf(10, 10, 1.0f, gdl::Color::Red, "Lick: timer%f frame%d", kieli_timer, kieli_frame);
+            //ibmFont.Printf(10, 10, 1.0f, gdl::Color::Red, "Lick: timer%f frame%d", kieli_timer, kieli_frame);
             float sitWh = frogSit.Xsize() /2;
             // depending on the frame of lick animation
             float lickW = kieli_frames[kieli_frame].Xsize();
