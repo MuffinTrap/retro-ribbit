@@ -4,6 +4,12 @@
 #include "frog.h"
 #include "snack.h"
 
+enum GameState
+{
+    StartScreen,
+    GameLoop
+};
+
 class Template
 {
     gdl::Image mel_image;
@@ -14,6 +20,7 @@ class Template
     gdl::Music sampleMusic;
     gdl::Sound blip;
     gdl::MenuCreator menu;
+    gdl::Image logo;
 
     // Frogs
     gdl::Image frogSit;
@@ -63,4 +70,12 @@ class Template
         glm::vec2 GetTongueHitboxCenter();
         glm::vec2 GetFrogRenderPos();
         float frogScale;
+
+        GameState currentState;
+
+        void UpdateGameLoop();
+        void DrawGameLoop();
+
+        void UpdateStartScreen();
+        void DrawStartScreen();
 };

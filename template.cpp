@@ -16,10 +16,11 @@
 
 #include "random_sammakko_png.h"
 #include "random_sammakko_super_isku_png.h"
-#include "lampi_png.h"
+#include "wide_bg_png.h"
 #include "kieli_png.h"
 #include "pahaa_png.h"
 #include "rouskis_wav.h"
+#include "logo_png.h"
 
 static u64 deltaTimeStart = 0;
 static u64 programStart = 0;
@@ -44,7 +45,8 @@ void Template::Init()
     pahaa_interval = 0.2;
     pahaa_frame = 0;
 
-    pond.LoadImageBuffer(lampi_png, lampi_png_size, gdl::Nearest, gdl::RGBA8);
+    pond.LoadImageBuffer(wide_bg_png, wide_bg_png_size, gdl::Nearest, gdl::RGBA8);
+    logo.LoadImageBuffer(logo_png, logo_png_size, gdl::Nearest, gdl::RGBA8);
 
     flySnack.LoadImageBuffer(fly_png, fly_png_size, gdl::Nearest, gdl::RGBA8);
     gdl::SpriteSetConfig flyCfg = flySnackSprites.CreateConfig(2, 360/2, 158);
@@ -72,6 +74,8 @@ void Template::Init()
     tongueHitBoxOffset = glm::vec2(-350, -165);
 
     rouskis.LoadSound(rouskis_wav, rouskis_wav_size);
+
+    currentState = GameState::StartScreen;
 }
 
 void Template::Update()
@@ -82,6 +86,19 @@ void Template::Update()
     deltaTimeF = (float)deltaTime;
     deltaTimeStart = now;
 
+    switch(currentState)
+    {
+        case StartScreen:
+            UpdateStartScreen();
+            break;
+        case GameLoop:
+            UpdateGameLoop();
+            break;
+    };
+}
+
+void Template::UpdateGameLoop()
+{
     glm::vec2 cursorPosInScreen = { gdl::WiiInput::GetCursorPosition().x , gdl::WiiInput::GetCursorPosition().y };
 
     frogState.pos += frogState.velocity * deltaTimeF;
@@ -132,19 +149,32 @@ void Template::UpdatePahaaAnimaatio()
     }
 }
 
-void DrawTextDouble(const char* text, short x, short y, float scale, gdl::FFont* font)
+void DrawTextDouble(const char* text, short x, short y, float scale, gdl::FFont* font, u32 color)
 {
     font->DrawText(text, x-font->GetWidth(text)*scale/2+4, y+4, scale, gdl::Color::Black);
-    font->DrawText(text, x-font->GetWidth(text)*scale/2, y, scale, gdl::Color::LightGreen);
+    font->DrawText(text, x-font->GetWidth(text)*scale/2, y, scale, color);
 
 }
 
 void Template::Draw()
 {
+    switch(currentState)
+    {
+        case StartScreen:
+            DrawStartScreen();
+            break;
+        case GameLoop:
+            DrawGameLoop();
+            break;
+    };
+}
+
+void Template::DrawGameLoop()
+{
     // Draw Image
 
     pond.Put(gdl::ScreenCenterX, gdl::ScreenCenterY, gdl::Color::White,
-             gdl::AlignmentModes::Centered, gdl::AlignmentModes::Centered, 1.5f, 0.0f);
+             gdl::AlignmentModes::Centered, gdl::AlignmentModes::Centered, 1.0f, 0.0f);
 
     frogRollRadians = gdl::WiiInput::GetRoll();
     glm::vec2 frogRenderPos = worldToScreen(frogState.pos);
@@ -218,4 +248,40 @@ glm::vec2 Template::screenToWorld(glm::vec2 p_screen) {
 
 glm::vec2 Template::worldToScreen(glm::vec2 p_world) {
     return p_world * glm::vec2(worldToScreenScale, -worldToScreenScale) + renderOffset;
+}
+
+void Template::UpdateStartScreen()
+{
+    if (gdl::WiiInput::ButtonPress(WPAD_BUTTON_A) || gdl::WiiInput::ButtonPress(WPAD_BUTTON_B))
+    {
+        currentState = GameState::GameLoop;
+    }
+}
+
+void Template::DrawStartScreen()
+{
+    float infoScale = 3.0f;
+    const char* info = "Press A or B";
+    const char* info2 = "to start!";
+
+    pond.Put(gdl::ScreenCenterX, gdl::ScreenCenterY, gdl::Color::White,
+             gdl::AlignmentModes::Centered, gdl::AlignmentModes::Centered, 1.0f, 0.0f);
+
+    logo.Put(gdl::ScreenCenterX, gdl::ScreenCenterY - ibmFont.GetHeight()*infoScale,
+             gdl::Color::White, gdl::Centered, gdl::Centered, 1.0f, 0.0f);
+
+    frogSit.Put(gdl::ScreenCenterX + frogSit.Xsize()*frogScale*2,
+                gdl::ScreenYres - frogSit.Ysize()*frogScale,
+                gdl::Color::White, 0, 0, frogScale, 0.0f);
+
+    DrawTextDouble(info,
+                   gdl::ScreenCenterX,
+                   gdl::ScreenCenterY + gdl::ScreenYres/6 + ibmFont.GetHeight() * infoScale,
+                   infoScale,
+                   &ibmFont, gdl::Color::LightRed);
+    DrawTextDouble(info2,
+                   gdl::ScreenCenterX,
+                   gdl::ScreenCenterY + gdl::ScreenYres/6 + ibmFont.GetHeight() * 2.0f * infoScale,
+                   infoScale,
+                   &ibmFont, gdl::Color::LightRed);
 }
