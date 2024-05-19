@@ -22,6 +22,8 @@
 #include "pahaa_png.h"
 #include "rouskis_wav.h"
 #include "logo_png.h"
+#include "pelimusa_ogg.h"
+#include "woodwind_ogg.h"
 
 static u64 deltaTimeStart = 0;
 static u64 programStart = 0;
@@ -63,8 +65,9 @@ void Template::Init()
     ibmFontImage.LoadImageBuffer(font8x16_png, font8x16_png_size, gdl::Nearest, gdl::RGBA8);
     ibmFont.BindSheet(ibmFontImage, 8, 16, ' ');
     
-    blip.LoadSound(blipSelect_wav, blipSelect_wav_size);
-    sampleMusic.LoadFromBuffer(sample3_ogg, sample3_ogg_size);
+    slurps.LoadSound(blipSelect_wav, blipSelect_wav_size);
+    pelimusa.LoadFromBuffer(pelimusa_ogg, pelimusa_ogg_size);
+    woodwind.LoadFromBuffer(woodwind_ogg, woodwind_ogg_size);
 
     menu = gdl::MenuCreator(&ibmFont, 1.5f, 1.2f);
 
@@ -81,6 +84,7 @@ void Template::Init()
     rouskis.LoadSound(rouskis_wav, rouskis_wav_size);
 
     currentState = GameState::StartScreen;
+    woodwind.PlayMusic(false);
 }
 
 void Template::Update()
@@ -145,6 +149,12 @@ void Template::UpdateGameLoop()
         // Catch the fly
         fly.position = glm::vec2(gdl::ScreenCenterX, -100);
         frogState.flyCaught = true;
+    }
+    // Check and loop music
+    if (StatusOgg() == OGG_STATUS_EOF)
+    {
+        // Music has stopped, start again
+        pelimusa.PlayMusic(false);
     }
 }
 
@@ -255,6 +265,14 @@ void Template::UpdateStartScreen()
     if (gdl::WiiInput::ButtonPress(WPAD_BUTTON_A) || gdl::WiiInput::ButtonPress(WPAD_BUTTON_B))
     {
         currentState = GameState::GameLoop;
+        woodwind.StopMusic();
+        pelimusa.PlayMusic(false);
+    }
+
+    if (StatusOgg() == OGG_STATUS_EOF)
+    {
+        // Music has stopped, start again
+        woodwind.PlayMusic(false);
     }
 }
 
@@ -296,6 +314,11 @@ void Template::ChangeFrogAnimation(FrogAnimation newAnimation)
     {
         frogState.flyCaught = false;
         rouskis.Play(1.0f, 100.0f);
+    }
+    else if (newAnimation == FrogAnimation::Lick)
+    {
+        float pitch =  (float)rand()/(float)RAND_MAX;
+        slurps.Play(0.5f + pitch, 100.0f);
     }
     frogState.currentAnimation = newAnimation;
 }

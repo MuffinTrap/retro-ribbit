@@ -17,8 +17,10 @@ class Template
     gdl::Image ibmFontImage;
     gdl::Image pointerImage;
     gdl::FFont ibmFont;
-    gdl::Music sampleMusic;
-    gdl::Sound blip;
+    gdl::Music pelimusa;
+    gdl::Music marimba;
+    gdl::Music woodwind;
+    gdl::Sound slurps;
     gdl::MenuCreator menu;
     gdl::Image logo;
 
