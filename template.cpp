@@ -11,7 +11,7 @@
 #include "pointer_png.h"
 #include "font8x16_png.h"
 #include "sample3_ogg.h"
-#include "blipSelect_wav.h"
+#include "slurps_wav.h"
 #include "fly_png.h"
 
 #include "random_sammakko_png.h"
@@ -67,7 +67,7 @@ void Template::Init()
     ibmFontImage.LoadImageBuffer(font8x16_png, font8x16_png_size, gdl::Nearest, gdl::RGBA8);
     ibmFont.BindSheet(ibmFontImage, 8, 16, ' ');
     
-    slurps.LoadSound(blipSelect_wav, blipSelect_wav_size);
+    slurps.LoadSound(slurps_wav, slurps_wav_size);
     pelimusa.LoadFromBuffer(pelimusa_ogg, pelimusa_ogg_size);
     woodwind.LoadFromBuffer(woodwind_ogg, woodwind_ogg_size);
 
