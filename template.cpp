@@ -85,8 +85,24 @@ void Template::Init()
 
     rouskis.LoadSound(rouskis_wav, rouskis_wav_size);
 
-    currentState = GameState::StartScreen;
-    woodwind.PlayMusic(false);
+    ChangeGameState(GameState::StartScreen);
+}
+
+void Template::ChangeGameState(GameState newState)
+{
+    if (newState == GameState::GameLoop)
+    {
+        frogState.fliesCaught = 0;
+        frogState.flyCaught = false;
+        woodwind.StopMusic();
+        pelimusa.PlayMusic(false);
+    }
+    else if (newState == GameState::StartScreen)
+    {
+        pelimusa.StopMusic();
+        woodwind.PlayMusic(false);
+    }
+    currentState = newState;
 }
 
 void Template::Update()
@@ -158,6 +174,10 @@ void Template::UpdateGameLoop()
         // Music has stopped, start again
         pelimusa.PlayMusic(false);
     }
+    if (frogState.fliesCaught >= 5)
+    {
+        ChangeGameState(GameState::StartScreen);
+    }
 }
 
 void Template::UpdatePahaaAnimaatio()
@@ -170,6 +190,9 @@ void Template::UpdatePahaaAnimaatio()
         if (pahaa_frame > 3)
         {
             pahaa_frame = 0;
+            // Add fly here so that the whole animation
+            // plays before game ends
+            frogState.fliesCaught += 1;
             ChangeFrogAnimation(FrogAnimation::Sit);
         }
     }
@@ -217,6 +240,22 @@ void Template::DrawGameLoop()
     DrawFrog();
 
     foreground_grass.Put(0, gdl::ScreenYres - foreground_grass.Ysize(), gdl::Color::White, 0, 0, 1.f);
+
+    // Draw fly score
+    short scoreSize = 60;
+    short scoreBoxX =gdl::ScreenXres - scoreSize*1.5f;
+    short scoreBoxY =gdl::ScreenYres - scoreSize*1.5f;
+    gdl::DrawBoxFG(scoreBoxX, scoreBoxY, scoreBoxX + scoreSize, scoreBoxY+scoreSize,
+                  gdl::Color::White, gdl::Color::White,
+                   gdl::Color::LightBlue, gdl::Color::LightBlue);
+    float scoreScale = 4.0f;
+    ibmFont.Printf(scoreBoxX + scoreSize/2 - (ibmFont.GetWidth() * scoreScale)/2.0f + 4,
+                   scoreBoxY + scoreSize/2 - (ibmFont.GetHeight() * scoreScale)/2.0f + 4,
+                   scoreScale, gdl::Color::Black, "%d", 5 - frogState.fliesCaught);
+
+    ibmFont.Printf(scoreBoxX + scoreSize/2 - (ibmFont.GetWidth() * scoreScale)/2.0f,
+                   scoreBoxY + scoreSize/2 - (ibmFont.GetHeight() * scoreScale)/2.0f,
+                   scoreScale, gdl::Color::LightRed, "%d", 5 - frogState.fliesCaught);
 
     // Input
     short top = 32;
@@ -268,11 +307,9 @@ glm::vec2 Template::worldToScreen(glm::vec2 p_world) {
 
 void Template::UpdateStartScreen()
 {
-    if (gdl::WiiInput::ButtonPress(WPAD_BUTTON_A) || gdl::WiiInput::ButtonPress(WPAD_BUTTON_B))
+    if (gdl::WiiInput::ButtonHeld(WPAD_BUTTON_A) && gdl::WiiInput::ButtonHeld(WPAD_BUTTON_B))
     {
-        currentState = GameState::GameLoop;
-        woodwind.StopMusic();
-        pelimusa.PlayMusic(false);
+        ChangeGameState(GameState::GameLoop);
     }
 
     if (StatusOgg() == OGG_STATUS_EOF)

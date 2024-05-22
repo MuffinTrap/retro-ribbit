@@ -14,4 +14,5 @@ struct FrogState {
     glm::vec2 velocity = { 0, 0 };
     FrogAnimation currentAnimation = FrogAnimation::Sit;
     bool flyCaught = false;
+    int fliesCaught = 0;
 };

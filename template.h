@@ -78,6 +78,7 @@ class Template
         float frogScale;
 
         GameState currentState;
+        void ChangeGameState(GameState newState);
 
         void UpdateGameLoop();
         void DrawGameLoop();
