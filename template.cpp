@@ -111,6 +111,9 @@ void Template::Update()
     deltaTimeF = (float)deltaTime;
     deltaTimeStart = now;
 
+    // Used in both states
+    frogRollRadians = gdl::WiiInput::GetRoll();
+
     switch(currentState)
     {
         case StartScreen:
@@ -279,7 +282,11 @@ void Template::DrawGameLoop()
 
 void Template::DrawPahaaAnimaatio(int x, int y)
 {
-    pahaa_sprites.Put(x, y, pahaa_frame, gdl::Color::White, gdl::Centered, gdl::Centered, frogScale * 2.f, RadToDeg(frogRollRadians));
+    // Scale * 2 since the animation spritesheet
+    // is half the size of other frog images
+    pahaa_sprites.Put(x, y, pahaa_frame, gdl::Color::White,
+                      gdl::Centered, gdl::Centered,
+                      frogScale * 2.f, RadToDeg(frogRollRadians));
 }
 
 void Template::DrawInputInfo(int x, int y)
@@ -294,7 +301,7 @@ glm::vec2 Template::GetTongueHitboxCenter()
 {
     glm::vec2 frogRenderPos = GetFrogRenderPos();
     // Rotate offset
-    float rad = frogRollRadians;// + PI;
+    float rad = frogRollRadians;
     float cosRoll = cos(rad);
     float sinRoll = sin(rad);
     float rx = cosRoll * tongueHitBoxOffset.x - sinRoll * tongueHitBoxOffset.y;
@@ -335,9 +342,13 @@ void Template::UpdateStartScreen()
 
 void Template::DrawStartScreen()
 {
-    float infoScale = 3.0f;
-    const char* info = "Press A or B";
-    const char* info2 = "to start!";
+    float infoScale = 2.5f;
+    std::string infos[3] = {
+        "A: Hop B: Eat",
+        "Roll the Wiimote!",
+        "Press A and B to start!"
+    };
+
 
     pond.Put(gdl::ScreenCenterX, gdl::ScreenCenterY, gdl::Color::White,
              gdl::AlignmentModes::Centered, gdl::AlignmentModes::Centered, 1.0f, 0.0f);
@@ -345,20 +356,20 @@ void Template::DrawStartScreen()
     logo.Put(gdl::ScreenCenterX, gdl::ScreenCenterY - ibmFont.GetHeight()*infoScale,
              gdl::Color::White, gdl::Centered, gdl::Centered, 1.0f, 0.0f);
 
-    frogSit.Put(gdl::ScreenCenterX + frogSit.Xsize()*frogScale*2,
-                gdl::ScreenYres - frogSit.Ysize()*frogScale,
-                gdl::Color::White, 0, 0, frogScale, 0.0f);
+    frogSit.Put(gdl::ScreenCenterX + frogSit.Xsize()*frogScale*2.3f,
+                gdl::ScreenYres - frogSit.Ysize()*frogScale*0.8f,
+                gdl::Color::White, gdl::Centered, gdl::Centered,
+                frogScale, RadToDeg(frogRollRadians));
 
-    DrawTextDouble(info,
-                   gdl::ScreenCenterX,
-                   gdl::ScreenCenterY + gdl::ScreenYres/6 + ibmFont.GetHeight() * infoScale,
-                   infoScale,
-                   &ibmFont, gdl::Color::LightRed);
-    DrawTextDouble(info2,
-                   gdl::ScreenCenterX,
-                   gdl::ScreenCenterY + gdl::ScreenYres/6 + ibmFont.GetHeight() * 2.0f * infoScale,
-                   infoScale,
-                   &ibmFont, gdl::Color::LightRed);
+    for (int i = 0; i < 3; i++)
+    {
+        DrawTextDouble(infos[i].c_str(),
+            gdl::ScreenCenterX - 60,
+            gdl::ScreenCenterY + gdl::ScreenYres/6 + ibmFont.GetHeight() * (float)i * infoScale,
+            infoScale,
+            &ibmFont, gdl::Color::LightRed);
+
+    }
 }
 
 void Template::ChangeFrogAnimation(FrogAnimation newAnimation)
@@ -434,16 +445,14 @@ void Template::UpdateLickAnimation()
 
 void Template::DrawFrog()
 {
-    frogRollRadians = gdl::WiiInput::GetRoll();
     glm::vec2 frogRenderPos = worldToScreen(frogState.pos);
     switch (frogState.currentAnimation)
     {
         case FrogAnimation::Sit:
             frogSit.Put(
                 frogRenderPos.x, frogRenderPos.y,
-                gdl::Color::White, gdl::Centered, gdl::Centered, frogScale, frogRollRadians / PI * 180.0f
-            );
-            break;
+                gdl::Color::White, gdl::Centered, gdl::Centered, frogScale, RadToDeg(frogRollRadians));
+        break;
         case FrogAnimation::Lick:
         {
             //ibmFont.Printf(10, 10, 1.0f, gdl::Color::Red, "Lick: timer%f frame%d", kieli_timer, kieli_frame);
@@ -453,10 +462,9 @@ void Template::DrawFrog()
             float lickCenterX = lickW - sitWh;
             kieli_frames[kieli_frame].Put(
                 frogRenderPos.x, frogRenderPos.y,
-                gdl::Color::White, lickCenterX, gdl::Centered, frogScale, frogRollRadians / PI * 180.f
-            );
+                gdl::Color::White, lickCenterX, gdl::Centered, frogScale, RadToDeg(frogRollRadians));
         }
-            break;
+        break;
         case FrogAnimation::Eat:
             DrawPahaaAnimaatio(frogRenderPos.x, frogRenderPos.y);
             break;
