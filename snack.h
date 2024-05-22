@@ -12,11 +12,13 @@ class Snack{
 	void Draw(gdl::FFont* font);
 	void Update(float deltaTime);
 	void ResetToRandom();
+	float GetCatchRadius();
 	float maxSpeed;
 	float maxForce;
-
-	void SeekTarget(float deltaTime);
 	glm::vec2 position;
+
+	private:
+	void SeekTarget(float deltaTime);
 	glm::vec2 direction;
 	glm::vec2 velocity;
 	glm::vec2 acceleration;
@@ -27,4 +29,5 @@ class Snack{
 	float frameTime;
 	float animationTimer;
 	int animationFrame;
+	float radius;
 };

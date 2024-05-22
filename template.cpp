@@ -57,8 +57,9 @@ void Template::Init()
     foreground_grass.LoadImageBuffer(nurmikko_medium_png, nurmikko_medium_png_size, gdl::Nearest, gdl::RGBA8);
 
     flySnack.LoadImageBuffer(fly_png, fly_png_size, gdl::Nearest, gdl::RGBA8);
-    gdl::SpriteSetConfig flyCfg = flySnackSprites.CreateConfig(2, 360/2, 158);
+    gdl::SpriteSetConfig flyCfg = flySnackSprites.CreateConfig(2, 180/2, 79);
     flySnackSprites.LoadSprites(flyCfg, &flySnack);
+    fly = Snack(&flySnackSprites, glm::vec2(gdl::ScreenCenterX, gdl::ScreenYres/5));
     
     pointerImage.LoadImageBuffer(pointer_png, pointer_png_size, gdl::Nearest, gdl::RGBA8);
 
@@ -70,9 +71,8 @@ void Template::Init()
     pelimusa.LoadFromBuffer(pelimusa_ogg, pelimusa_ogg_size);
     woodwind.LoadFromBuffer(woodwind_ogg, woodwind_ogg_size);
 
-    fly = Snack(&flySnackSprites, glm::vec2(gdl::ScreenCenterX, gdl::ScreenYres/5));
-    tongueHitBoxSize = 60.0f;
-    tongueHitBoxOffset = glm::vec2(-350, -165);
+    tongueHitRadius = 20.0f;
+    tongueHitCenterOffset = glm::vec2(-350, -165);
 
     jumpBufferTime = 400;
 
@@ -168,7 +168,8 @@ void Template::UpdateGameLoop()
 
     // Check if the fly is caught
     bool tongueOut = frogState.currentAnimation == FrogAnimation::Lick && kieli_frame >= 1;
-    if (tongueOut && glm::length(fly.position - GetTongueHitboxCenter()) < tongueHitBoxSize/2)
+    float tongueToFly = glm::length(fly.position - GetTongueHitCenter());
+    if (tongueOut &&  tongueToFly < (tongueHitRadius + fly.GetCatchRadius()))
     {
         // Catch the fly
         fly.ResetToRandom();
@@ -235,13 +236,23 @@ void Template::DrawGameLoop()
     fly.Draw(&ibmFont);
 
     // DEBUG Draw tongue catch hitbox
+
     /*
-    if (frogState.currentAnimation == FrogAnimation::Lick && kieli_frame >= 1)
+    bool tongueOut = frogState.currentAnimation == FrogAnimation::Lick && kieli_frame >= 1;
+    u32 color = gdl::Color::Red;
+    if (tongueOut)
     {
-        glm::vec2 hb = GetTongueHitboxCenter();
-        gdl::DrawBox(hb.x - tongueHitBoxSize/2, hb.y - tongueHitBoxSize/2, hb.x + tongueHitBoxSize/2, hb.y + tongueHitBoxSize/2, gdl::Color::Red);
+        color = gdl::Color::Black;
     }
+    // float tongueToFly = glm::length(fly.position - GetTongueHitCenter());
+    glm::vec2 hb = GetTongueHitCenter();
+    short tr = tongueHitRadius;
+    glm::vec2 fp = fly.position;
+    short fr = fly.GetCatchRadius();
+    gdl::DrawBox(hb.x - tr, hb.y - tr, hb.x + tr, hb.y + tr, color);
+    gdl::DrawBox(fp.x - fr, fp.y - fr, fp.x + fr, fp.y + fr, color);
     */
+    // DEBUGEND
 
     DrawFrog();
 
@@ -297,15 +308,15 @@ void Template::DrawInputInfo(int x, int y)
     pointerImage.Put(cp.x,cp.y,gdl::Color::White, gdl::Centered, gdl::Centered, 0.25f);
 }
 
-glm::vec2 Template::GetTongueHitboxCenter()
+glm::vec2 Template::GetTongueHitCenter()
 {
     glm::vec2 frogRenderPos = GetFrogRenderPos();
     // Rotate offset
     float rad = frogRollRadians;
     float cosRoll = cos(rad);
     float sinRoll = sin(rad);
-    float rx = cosRoll * tongueHitBoxOffset.x - sinRoll * tongueHitBoxOffset.y;
-    float ry = sinRoll * tongueHitBoxOffset.x + cosRoll *tongueHitBoxOffset.y;
+    float rx = cosRoll * tongueHitCenterOffset.x - sinRoll * tongueHitCenterOffset.y;
+    float ry = sinRoll * tongueHitCenterOffset.x + cosRoll *tongueHitCenterOffset.y;
     glm::vec2 rotatedHitCenter = glm::vec2(rx, ry);
 
     glm::vec2 hitboxCenter = glm::vec2(frogRenderPos.x, frogRenderPos.y) + rotatedHitCenter * frogScale;
@@ -345,7 +356,7 @@ void Template::DrawStartScreen()
     float infoScale = 2.5f;
     std::string infos[3] = {
         "A: Hop B: Eat",
-        "Roll the Wiimote!",
+        "Roll the Wiimote",
         "Press A and B to start!"
     };
 

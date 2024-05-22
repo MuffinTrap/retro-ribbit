@@ -27,13 +27,20 @@ Snack::Snack(gdl::SpriteSet* sprites, glm::vec2 startPosition)
 	frameTime = 0.05;
 	animationTimer = 0.0f;
 	animationFrame = 0;
+
+	const gdl::Sprite* info = sprites->SpriteInfo(0);
+	radius = info->w/2.0f;
+}
+
+float Snack::GetCatchRadius()
+{
+	return radius * 0.6;
 }
 
 void Snack::ResetToRandom()
 {
-	const gdl::Sprite* info = sprites->SpriteInfo(0);
-	short size = info->w;
 	float side = GetRandFloat();
+	short size = radius * 2;
 	if (side < 0.3333f)
 	{
 		position = glm::vec2(-size, GetRandFloat()* gdl::ScreenYres/2);
@@ -52,7 +59,7 @@ void Snack::ResetToRandom()
 
 void Snack::Draw(gdl::FFont* font)
 {
-	sprites->Put(position.x, position.y, animationFrame, gdl::Color::White, gdl::Centered, gdl::Centered, 0.5f, 0.0f);
+	sprites->Put(position.x, position.y, animationFrame, gdl::Color::White, gdl::Centered, gdl::Centered, 1.0f, 0.0f);
 
 	/*
 	// Debug draw target

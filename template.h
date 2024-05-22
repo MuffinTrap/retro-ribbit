@@ -49,8 +49,8 @@ class Template
     glm::vec2 renderOffset = glm::vec2(320.f, 480.f * 0.75f);
 
     // Offset from frog position to where the hitbox is
-    glm::vec2 tongueHitBoxOffset;
-    float tongueHitBoxSize;
+    glm::vec2 tongueHitCenterOffset;
+    float tongueHitRadius;
     float frogRollRadians;
 
     // Jump buffering timing, in milliseconds
@@ -76,7 +76,7 @@ class Template
 
         glm::vec2 screenToWorld(glm::vec2 p_screen);
         glm::vec2 worldToScreen(glm::vec2 p_world);
-        glm::vec2 GetTongueHitboxCenter();
+        glm::vec2 GetTongueHitCenter();
         glm::vec2 GetFrogRenderPos();
         float frogScale;
 
