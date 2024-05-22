@@ -11,6 +11,7 @@ class Snack{
 
 	void Draw(gdl::FFont* font);
 	void Update(float deltaTime);
+	void ResetToRandom();
 	float maxSpeed;
 	float maxForce;
 

@@ -12,18 +12,20 @@ enum GameState
 
 class Template
 {
-    gdl::Image mel_image;
-    gdl::SpriteSet mel_sprites;
     gdl::Image ibmFontImage;
-    gdl::Image pointerImage;
     gdl::FFont ibmFont;
-    gdl::Music pelimusa;
-    gdl::Music marimba;
-    gdl::Music woodwind;
-    gdl::Sound slurps;
-    gdl::MenuCreator menu;
+    gdl::Image pointerImage;
     gdl::Image logo;
     gdl::Image foreground_grass;
+
+    gdl::Music pelimusa;
+    gdl::Music woodwind;
+    gdl::Sound slurps;
+    gdl::Sound rouskis;
+
+    double deltaTime;
+    float deltaTimeF;
+    int elapsedMS;
 
     // Frogs
     gdl::Image frogSit;
@@ -35,13 +37,12 @@ class Template
     double pahaa_timer;
     double pahaa_interval;
     int pahaa_frame;
+
     double kieli_timer;
     double kieli_interval;
     int kieli_frame;
     int kieli_animation_direction;
-    double deltaTime;
-    float deltaTimeF;
-    float elapsed;
+
     FrogState frogState;
     float groundY = 0.f;
     float worldToScreenScale = 480.f / 4.f;
@@ -52,12 +53,14 @@ class Template
     float tongueHitBoxSize;
     float frogRollRadians;
 
+    // Jump buffering timing, in milliseconds
+    int jumpPressedTime = 0;
+    int jumpBufferTime = 0;
+
     // Snacks
     gdl::Image flySnack;
     gdl::SpriteSet flySnackSprites;
     Snack fly;
-
-    gdl::Sound rouskis;
 
     public:
         Template();

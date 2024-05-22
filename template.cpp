@@ -10,7 +10,6 @@
 #include "const.h"
 #include "pointer_png.h"
 #include "font8x16_png.h"
-#include "sample3_ogg.h"
 #include "slurps_wav.h"
 #include "fly_png.h"
 
@@ -50,7 +49,7 @@ void Template::Init()
     gdl::SpriteSetConfig pahaacf = pahaa_sprites.CreateConfig(4, 582/4, 138);
     pahaa_sprites.LoadSprites(pahaacf, &pahaa);
     pahaa_timer = 0;
-    pahaa_interval = 0.2;
+    pahaa_interval = 0.3;
     pahaa_frame = 0;
 
     pond.LoadImageBuffer(wide_bg_png, wide_bg_png_size, gdl::Nearest, gdl::RGBA8);
@@ -63,15 +62,19 @@ void Template::Init()
     
     pointerImage.LoadImageBuffer(pointer_png, pointer_png_size, gdl::Nearest, gdl::RGBA8);
 
-
     ibmFontImage.LoadImageBuffer(font8x16_png, font8x16_png_size, gdl::Nearest, gdl::RGBA8);
     ibmFont.BindSheet(ibmFontImage, 8, 16, ' ');
     
     slurps.LoadSound(slurps_wav, slurps_wav_size);
+    rouskis.LoadSound(rouskis_wav, rouskis_wav_size);
     pelimusa.LoadFromBuffer(pelimusa_ogg, pelimusa_ogg_size);
     woodwind.LoadFromBuffer(woodwind_ogg, woodwind_ogg_size);
 
-    menu = gdl::MenuCreator(&ibmFont, 1.5f, 1.2f);
+    fly = Snack(&flySnackSprites, glm::vec2(gdl::ScreenCenterX, gdl::ScreenYres/5));
+    tongueHitBoxSize = 60.0f;
+    tongueHitBoxOffset = glm::vec2(-350, -165);
+
+    jumpBufferTime = 400;
 
     // settime((u64)0); // Setting time to 0 crashes Dolphin!
     deltaTimeStart = gettime();
@@ -79,12 +82,7 @@ void Template::Init()
     // Initialize randomness
     std::srand(deltaTimeStart);
 
-    fly = Snack(&flySnackSprites, glm::vec2(gdl::ScreenCenterX, gdl::ScreenYres/5));
-    tongueHitBoxSize = 60.0f;
-    tongueHitBoxOffset = glm::vec2(-350, -165);
-
-    rouskis.LoadSound(rouskis_wav, rouskis_wav_size);
-
+    // Start music etc...
     ChangeGameState(GameState::StartScreen);
 }
 
@@ -108,7 +106,7 @@ void Template::ChangeGameState(GameState newState)
 void Template::Update()
 {
     u64 now = gettime();
-    elapsed=ticks_to_millisecs(now - programStart);
+    elapsedMS=ticks_to_millisecs(now - programStart);
     deltaTime = (double)(now - deltaTimeStart) / (double)(TB_TIMER_CLOCK * 1000); // division is to convert from ticks to seconds
     deltaTimeF = (float)deltaTime;
     deltaTimeStart = now;
@@ -139,13 +137,18 @@ void Template::UpdateGameLoop()
 
     bool frogOnGround = frogState.pos.y <= groundY && frogState.velocity.y <= 0.f;
 
+    if (gdl::WiiInput::ButtonPress(WPAD_BUTTON_A) || gdl::WiiInput::ButtonHeld(WPAD_BUTTON_A)) {
+        jumpPressedTime = elapsedMS;
+    }
+
     if (frogOnGround) {
         glm::vec2 frogWalkDiff = cursorPosInWorld - frogState.pos;
         if (glm::abs(frogWalkDiff.x) > 0.1f) {
             frogState.velocity = glm::vec2((frogWalkDiff * frog_walk_speed).x, frog_jump_speed_small);
         }
 
-        if (gdl::WiiInput::ButtonHeld(WPAD_BUTTON_A)) {
+        if (elapsedMS - jumpPressedTime <= jumpBufferTime)
+        {
             frogState.velocity = glm::normalize(frogWalkDiff) * frog_jump_speed_high;
         }
     }
@@ -165,7 +168,7 @@ void Template::UpdateGameLoop()
     if (tongueOut && glm::length(fly.position - GetTongueHitboxCenter()) < tongueHitBoxSize/2)
     {
         // Catch the fly
-        fly.position = glm::vec2(gdl::ScreenCenterX, -100);
+        fly.ResetToRandom();
         frogState.flyCaught = true;
     }
     // Check and loop music
@@ -261,6 +264,17 @@ void Template::DrawGameLoop()
     short top = 32;
     short left = 32;
     DrawInputInfo(left, top);
+
+
+    // DEBUG jump buffering
+    /*
+    if (elapsedMS - jumpPressedTime <= jumpBufferTime)
+    {
+        ibmFont.Printf(gdl::ScreenCenterX - scoreSize - (ibmFont.GetWidth() * scoreScale)/2.0f,
+                   scoreBoxY + scoreSize/2 - (ibmFont.GetHeight() * 1.0f)/2.0f,
+                   2.0f, gdl::Color::LightRed, "Buffer %d", (elapsedMS - jumpPressedTime));
+    }
+    */
 }
 
 void Template::DrawPahaaAnimaatio(int x, int y)
@@ -353,6 +367,11 @@ void Template::ChangeFrogAnimation(FrogAnimation newAnimation)
     {
         return;
     }
+    // Eating animation cannot be interrupted by Lick
+    if (newAnimation == FrogAnimation::Lick && frogState.currentAnimation == FrogAnimation::Eat)
+    {
+        return;
+    }
     if (newAnimation == FrogAnimation::Eat)
     {
         frogState.flyCaught = false;
@@ -363,6 +382,7 @@ void Template::ChangeFrogAnimation(FrogAnimation newAnimation)
         float pitch =  (float)rand()/(float)RAND_MAX;
         slurps.Play(0.5f + pitch, 100.0f);
     }
+
     frogState.currentAnimation = newAnimation;
 }
 

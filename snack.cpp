@@ -1,6 +1,11 @@
 #include "snack.h"
 #include <cstdlib>
 
+static float GetRandFloat()
+{
+	return (float)rand()/(float)RAND_MAX;
+}
+
 Snack::Snack()
 {
 
@@ -19,10 +24,29 @@ Snack::Snack(gdl::SpriteSet* sprites, glm::vec2 startPosition)
 	maxSpeed = 100;
 	maxForce = 167.0f;
 
-
 	frameTime = 0.05;
 	animationTimer = 0.0f;
 	animationFrame = 0;
+}
+
+void Snack::ResetToRandom()
+{
+	const gdl::Sprite* info = sprites->SpriteInfo(0);
+	short size = info->w;
+	float side = GetRandFloat();
+	if (side < 0.3333f)
+	{
+		position = glm::vec2(-size, GetRandFloat()* gdl::ScreenYres/2);
+
+	}else if (side >= 0.3333f && side < 0.666)
+	{
+		position = glm::vec2(GetRandFloat()* gdl::ScreenXres, - size);
+	}
+	else
+	{
+		position = glm::vec2(gdl::ScreenXres + size, GetRandFloat()* gdl::ScreenYres/2);
+	}
+	target = position;
 }
 
 
@@ -60,10 +84,6 @@ void Snack::Update(float deltaTime)
 	}
 }
 
-static float GetRandFloat()
-{
-	return (float)rand()/(float)RAND_MAX;
-}
 
 void Snack::SeekTarget(float deltaTime)
 {
